@@ -1,0 +1,11 @@
+{
+  "title": "Estilo & Graça",
+  "description": "Discover premium hair straightening, highlights, and treatments at Salão Estilo & Graça in Camaçari, explore salon locations, and book appointments with expert stylist Sheila Santos.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
