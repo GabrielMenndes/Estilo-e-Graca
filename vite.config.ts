@@ -11,8 +11,8 @@ import siteConfiguration from './.figma/make/site.json'
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
-  // GitHub Pages: repo name = Estilo-gGra-a
-  const base = process.env.GITHUB_PAGES ? '/Estilo-gGra-a/' : (process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/')
+  // GitHub Pages: repo name = Estilo-e-Graca
+  const base = process.env.GITHUB_PAGES ? '/Estilo-e-Graca/' : (process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/')
 
   return {
     base,
