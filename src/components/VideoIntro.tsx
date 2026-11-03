@@ -10,7 +10,7 @@ interface VideoIntroProps {
 
 export function VideoIntro({
   onComplete,
-  videoSrc = '/videodaentrada.mp4',
+  videoSrc = `${import.meta.env.BASE_URL}videodaentrada.mp4`,
   transitionTimestamp = 3.5, // default: 3.5 seconds (adjust based on your video)
 }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)

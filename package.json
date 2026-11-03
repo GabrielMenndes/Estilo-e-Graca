@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "build:gh-pages": "cross-env GITHUB_PAGES=true vite build",
+    "deploy": "npm run build:gh-pages && gh-pages -d dist",
+    "deploy:preview": "vite build && gh-pages -d dist"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -21,6 +24,8 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "cross-env": "^10.1.0",
+    "gh-pages": "^6.3.0",
     "oxfmt": "^0.2.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",

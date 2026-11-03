@@ -123,7 +123,7 @@ function Logo({ light = false }: { light?: boolean }) {
         <img
           alt=""
           className="h-full w-full rounded-full object-contain shadow-[0_4px_4px_0_rgba(221,168,176,0.25),inset_0_4px_4px_0_rgb(221,168,176)]"
-          src="/assets/logo-estilo-graca-transparent.png"
+          src={`${import.meta.env.BASE_URL}assets/logo-estilo-graca-transparent.png`}
         />
       </span>
       <span className="leading-none">
