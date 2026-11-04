@@ -115,9 +115,11 @@ export function VideoIntro({
       <video
         ref={videoRef}
         src={videoSrc}
+        poster={`${import.meta.env.BASE_URL}assets/logo-do-live-con.jpg?v=4`}
         autoPlay
         muted
         playsInline
+        preload="auto"
         style={{
           position: 'absolute',
           inset: 0,
