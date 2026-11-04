@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { Icon } from './Icon'
@@ -13,7 +13,7 @@ interface ArrowRevealButtonProps {
   className?: string
   disabled?: boolean
   type?: 'button' | 'submit'
-  iconName?: 'arrow' | 'chevron' | 'plus' | 'whatsapp' | 'sparkle'
+  iconName?: 'arrow' | 'chevron' | 'plus' | 'whatsapp' | 'sparkle' | 'instagram'
 }
 
 const colorVariants = {
@@ -69,7 +69,7 @@ export function ArrowRevealButton({
   type = 'button',
   iconName = 'arrow',
 }: ArrowRevealButtonProps) {
-  const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null)
+  const buttonRef = useRef<HTMLElement | null>(null)
   const badgeRef = useRef<HTMLDivElement>(null)
   const iconRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
@@ -160,7 +160,7 @@ export function ArrowRevealButton({
     gsap.to(badgeRef.current, {
       scale: m.coverScale,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
 
     // Animate icon movement from slot center to button center + rotation
@@ -168,14 +168,14 @@ export function ArrowRevealButton({
       x: m.iconTravelX,
       rotation: 45,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
 
     // Animate text shift
     gsap.to(textRef.current, {
       x: isLeft ? 8 : -8,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
   }
 
@@ -186,20 +186,20 @@ export function ArrowRevealButton({
     gsap.to(badgeRef.current, {
       scale: 1,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
 
     gsap.to(iconRef.current, {
       x: 0,
       rotation: 0,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
 
     gsap.to(textRef.current, {
       x: 0,
       duration: 0.46,
-      ease: [0.44, 0, 0.56, 1],
+      ease: 'power2.inOut',
     })
   }
 
@@ -272,7 +272,9 @@ export function ArrowRevealButton({
       className={className}
     >
       <Tag
-        ref={buttonRef}
+        ref={(element: HTMLButtonElement | HTMLAnchorElement | null) => {
+          buttonRef.current = element
+        }}
         href={href}
         type={href ? undefined : type}
         onClick={handleClick}
@@ -381,7 +383,7 @@ export function ArrowRevealButton({
             top: 0,
           }}
         >
-          <Icon name={iconName} className={`size-[${sizing.iconSize}px]`} />
+          <Icon name={iconName} className="size-5" style={{ width: sizing.iconSize, height: sizing.iconSize }} />
         </div>
       </Tag>
 

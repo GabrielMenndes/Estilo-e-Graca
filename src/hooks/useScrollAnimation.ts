@@ -73,8 +73,6 @@ export function useSectionTitleScrollLinked() {
     const ctx = gsap.context(() => {
       // Seleciona todos os títulos de seção
       const sectionTitles = document.querySelectorAll('.section-title')
-      const eyebrows = document.querySelectorAll('.eyebrow')
-      const sectionTexts = document.querySelectorAll('.section-text')
 
       if (!sectionTitles.length) return
 
@@ -83,56 +81,52 @@ export function useSectionTitleScrollLinked() {
         const id = section.id
         if (!id) return
 
-        const title = section.querySelector('.section-title')
-        const eyebrow = section.querySelector('.eyebrow')
-        const text = section.querySelector('.section-text')
-        const cards = section.querySelectorAll('.service-card, article, blockquote, .auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a, #unidades article, #depoimentos blockquote')
-
-        if (!title) return
-
-        // Timeline para a seção
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 75%',
-            end: 'bottom 25%',
-            scrub: 0.6,
-            toggleActions: 'play reverse play reverse',
-          }
-        })
-
-        // Eyebrow - aparece primeiro
-        if (eyebrow) {
-          tl.fromTo(eyebrow,
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' },
-            0
-          )
-        }
-
-        // Título - revela com stagger nas linhas
-        tl.fromTo(title,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' },
-          0.1
+        const textElements = section.querySelectorAll(
+          '.eyebrow, .section-title, .section-text, .service-card h3, .service-card p, .service-card > div > span, #unidades article h3, #unidades article p, blockquote',
+        )
+        const cards = section.querySelectorAll(
+          '.service-card, #unidades article, .testimonial-card, .auto-rows-57\\.5 > a, .md\\:auto-rows-75 > a',
         )
 
-        // Texto descritivo
-        if (text) {
-          tl.fromTo(text,
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' },
-            0.2
-          )
+        if (textElements.length) {
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: 'top 92%',
+                end: 'bottom 8%',
+                scrub: 0.7,
+              },
+            })
+              .fromTo(
+                textElements,
+                { y: 24, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.22, ease: 'none', stagger: 0.04 },
+              )
+              .to(
+                textElements,
+                { y: -18, opacity: 0, duration: 0.18, ease: 'none', stagger: 0.03 },
+                0.82,
+              )
         }
 
-        // Cards/itens com stagger
         if (cards.length) {
-          tl.fromTo(cards,
-            { y: 40, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 },
-            0.3
-          )
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: 'top 82%',
+                toggleActions: 'play none none none',
+                once: true,
+              },
+            })
+            .fromTo(cards, { y: 36, opacity: 0 }, {
+              y: 0,
+              opacity: 1,
+              duration: 0.7,
+              ease: 'power2.out',
+              stagger: 0.1,
+            })
         }
       })
     })
@@ -275,31 +269,16 @@ export function useHeroScrollLinkedAnimation() {
 }
 
 /**
- * Efeito de texto "split reveal" - cada palavra/linha anima individualmente no scroll.
- * Usa GSAP SplitText-like approach sem plugin extra.
+ * Revela apenas os elementos de texto, preservando a marcação interna e os estilos.
  */
 export function useTextSplitReveal(selector: string = '.section-title') {
   useGSAP(() => {
     const ctx = gsap.context(() => {
       const elements = document.querySelectorAll(selector)
 
-      elements.forEach((el) => {
-        // Guardar texto original
-        const originalText = el.textContent || ''
-        if (!originalText.trim()) return
+      if (!elements.length) return
 
-        // Dividir em palavras
-        const words = originalText.split(' ').filter(w => w.length > 0)
-        if (words.length <= 1) return
-
-        // Substituir por spans
-        el.innerHTML = words.map((word, i) =>
-          `<span class="split-word" style="display: inline-block; opacity: 0; transform: translateY(30px);" data-index="${i}">${word}</span>`
-        ).join(' ')
-
-        const wordElements = el.querySelectorAll('.split-word')
-
-        gsap.fromTo(wordElements,
+      gsap.fromTo(elements,
           { y: 30, opacity: 0 },
           {
             y: 0,
@@ -308,15 +287,13 @@ export function useTextSplitReveal(selector: string = '.section-title') {
             ease: 'power2.out',
             stagger: 0.05,
             scrollTrigger: {
-              trigger: el,
+              trigger: elements[0],
               start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play none none reverse',
+              toggleActions: 'play none none none',
               once: true,
             }
           }
         )
-      })
     })
 
     return () => ctx.revert()

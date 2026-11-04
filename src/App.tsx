@@ -1,4 +1,4 @@
-import { useState, type ReactNode, useRef, useEffect } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -123,7 +123,7 @@ function Logo({ light = false }: { light?: boolean }) {
       className="group flex items-center gap-3"
       href="#inicio"
     >
-      <span className="logo-shine relative grid h-14 w-16 shrink-0 place-items-center overflow-hidden rounded-full md:h-16 md:w-[72px]">
+      <span className="logo-shine relative grid h-14 w-16 shrink-0 place-items-center overflow-hidden rounded-full md:h-16 md:w-18">
         <img
           alt=""
           className="h-full w-full rounded-full object-contain shadow-[0_4px_4px_0_rgba(221,168,176,0.25),inset_0_4px_4px_0_rgb(221,168,176)]"
@@ -207,6 +207,8 @@ function App() {
 
   // Hero: Parallax em camadas + Reveal inicial
   useGSAP(() => {
+    if (!showSite) return
+
     const heroSection = document.querySelector('#inicio')
     const heroTitle = document.querySelector('.hero-title')
     const heroText = document.querySelector('.hero-text')
@@ -215,7 +217,6 @@ function App() {
     const heroSocial = document.querySelector('.hero-social')
     const heroImage = document.querySelector('.hero-image')
     const heroCard = document.querySelector('.hero-card')
-    const statItems = document.querySelectorAll('.stat-item')
 
     if (!heroSection || !heroTitle || !heroText) return
 
@@ -244,10 +245,6 @@ function App() {
       if (heroImage) {
         heroTl.fromTo(heroImage, { y: 0 }, { y: 30, ease: 'none' }, 0)
       }
-      if (heroCard) {
-        heroTl.fromTo(heroCard, { y: 0 }, { y: -50, ease: 'none' }, 0)
-      }
-
       // TIMELINE DE REVEAL INICIAL (toggleActions)
       const revealTl = gsap.timeline({
         scrollTrigger: {
@@ -269,126 +266,68 @@ function App() {
         .fromTo('.hero-card', { y: 40, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: 'power2.out' }, 0.5)
         .fromTo('.stat-item', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.08 }, 0.3)
 
-      // Stats parallax contínuo
-      statItems.forEach((stat, index) => {
-        gsap.fromTo(stat, { y: 0 }, {
-          y: -30 + (index * 5),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroSection,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1 + (index * 0.1),
-          }
-        })
-      })
     })
 
     return () => ctx.revert()
-  }, [])
+  }, [showSite])
 
   // Seções: Timeline scrub por seção + Split text reveal
   useGSAP(() => {
+    if (!showSite) return
+
     const ctx = gsap.context(() => {
-      // Split text reveal para títulos
-      const splitTitles = (selector: string) => {
-        document.querySelectorAll(selector).forEach((el) => {
-          const originalText = el.textContent || ''
-          if (!originalText.trim()) return
-          const words = originalText.split(' ').filter(w => w.length > 0)
-          if (words.length <= 1) return
-          el.innerHTML = words.map((word, i) =>
-            `<span class="split-word" style="display: inline-block; opacity: 0; transform: translateY(30px);" data-index="${i}">${word}</span>`
-          ).join(' ')
-          const wordElements = el.querySelectorAll('.split-word')
-          gsap.fromTo(wordElements, { y: 30, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.05,
-            scrollTrigger: {
-              trigger: el, start: 'top 80%', end: 'bottom 20%',
-              toggleActions: 'play none none reverse', once: true,
-            }
-          })
-        })
-      }
-
-      splitTitles('.hero-title')
-      splitTitles('.section-title')
-
-      // Timeline scrub para cada seção
+      // Textos acompanham o scroll; cards e caixas entram uma vez e permanecem visíveis.
       document.querySelectorAll('section[id]').forEach((section) => {
-        const title = section.querySelector('.section-title')
-        const eyebrow = section.querySelector('.eyebrow')
-        const text = section.querySelector('.section-text')
-        const cards = section.querySelectorAll('.service-card, article, blockquote, .auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a, #unidades article, #depoimentos blockquote')
-        if (!title) return
+        const textElements = section.querySelectorAll(
+          '.eyebrow, .section-title, .section-text, .service-card h3, .service-card p, .service-card > div > span, #unidades article h3, #unidades article p, blockquote',
+        )
+        const cards = section.querySelectorAll(
+          '.service-card, #unidades article, .testimonial-card, .auto-rows-57\\.5 > a, .md\\:auto-rows-75 > a',
+        )
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 75%',
-            end: 'bottom 25%',
-            scrub: 0.6,
-            toggleActions: 'play reverse play reverse',
-          }
-        })
+        if (textElements.length) {
+          const textTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 92%',
+              end: 'bottom 8%',
+              scrub: 0.7,
+            },
+          })
 
-        if (eyebrow) {
-          tl.fromTo(eyebrow, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
+          textTimeline.fromTo(
+            textElements,
+            { y: 24, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.22, ease: 'none', stagger: 0.04 },
+            0,
+          ).to(
+            textElements,
+            { y: -18, opacity: 0, duration: 0.18, ease: 'none', stagger: 0.03 },
+            0.82,
+          )
         }
-        tl.fromTo(title, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' }, 0.1)
-        if (text) {
-          tl.fromTo(text, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 0.2)
-        }
+
         if (cards.length) {
-          tl.fromTo(cards, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }, 0.3)
+          const cardTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 82%',
+              toggleActions: 'play none none none',
+              once: true,
+            },
+          })
+
+          cardTimeline.fromTo(
+            cards,
+            { y: 36, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', stagger: 0.1 },
+            0,
+          )
         }
       })
     })
     return () => ctx.revert()
-  }, [])
-
-  // Staggered animations (entrada simples)
-  useGSAP(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo('.hero-badge', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', delay: 0.1,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-title', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out', delay: 0.2,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-text', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.3,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-buttons > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1, delay: 0.4,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-social', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.5,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-image', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out', delay: 0.3,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.hero-card', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.6,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.stat-item', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1, delay: 0.1,
-        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.service-card', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.15, delay: 0.2,
-        scrollTrigger: { trigger: '#servicos', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('#unidades article', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.15, delay: 0.2,
-        scrollTrigger: { trigger: '#unidades', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('#depoimentos blockquote', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.2,
-        scrollTrigger: { trigger: '#depoimentos', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-      gsap.fromTo('.auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1, delay: 0.2,
-        scrollTrigger: { trigger: '#transformacoes', start: 'top 85%', toggleActions: 'play none none none', once: true }
-      })
-    })
-    return () => ctx.revert()
-  }, [])
+  }, [showSite])
 
   return (
     <>
@@ -452,8 +391,8 @@ function App() {
       </header>
 
       <main>
-        <section className="relative min-h-[760px] pt-28 md:pt-36" id="inicio">
-          <div className="pointer-events-none absolute -left-40 top-36 size-[420px] rounded-full bg-rose/8 blur-3xl" />
+        <section className="relative min-h-190 pt-28 md:pt-36" id="inicio">
+          <div className="pointer-events-none absolute -left-40 top-36 size-105 rounded-full bg-rose/8 blur-3xl" />
           <div className="shell grid items-center gap-12 pb-20 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 lg:pb-24">
             <div className="relative z-10 pt-8 lg:pt-0">
               <div className="hero-badge mb-7 inline-flex items-center gap-2 rounded-full border border-rose/25 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-rose shadow-soft">
@@ -507,19 +446,19 @@ function App() {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[580px] lg:mx-0">
+            <div className="relative mx-auto w-full max-w-145 lg:mx-0">
               <div className="absolute -right-8 -top-8 hidden h-28 w-28 border-r border-t border-bronze/40 md:block" />
-              <div className="hero-image relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-rose/10 shadow-image">
+              <div className="hero-image relative aspect-4/5 overflow-hidden rounded-4xl bg-rose/10 shadow-image">
                 <img
                   alt="Mulher com cabelos longos, escuros e brilhantes"
                   className="h-full w-full object-cover object-top"
                   src={images.hero}
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/70 via-charcoal/10 to-transparent p-7 pt-28 text-white">
+                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-charcoal/70 via-charcoal/10 to-transparent p-7 pt-28 text-white">
                   <p className="font-display text-2xl italic">“Seu cabelo, sua identidade.”</p>
                 </div>
               </div>
-              <div className="hero-card absolute -bottom-7 -left-4 max-w-[245px] rounded-2xl border border-white/70 bg-white/95 p-5 shadow-card backdrop-blur md:-left-10">
+              <div className="hero-card absolute -bottom-7 -left-4 max-w-61.25 rounded-2xl border border-white/70 bg-white/95 p-5 shadow-card backdrop-blur md:-left-10">
                 <div className="flex items-center gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-full bg-rose/10 text-rose">
                     <Icon name="check" />
@@ -552,16 +491,16 @@ function App() {
 
         <section className="section-space" id="sobre">
           <div className="shell grid items-center gap-14 lg:grid-cols-2 lg:gap-24">
-            <div className="relative mx-auto w-full max-w-[560px]">
+            <div className="relative mx-auto w-full max-w-140">
               <div className="absolute -bottom-5 -left-5 h-full w-full rounded-t-[12rem] border border-bronze/35" />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-t-[12rem] rounded-b-2xl bg-rose/10">
+              <div className="relative aspect-4/5 overflow-hidden rounded-t-[12rem] rounded-b-2xl bg-rose/10">
                 <img
                   alt="Retrato editorial representando cuidado e beleza capilar"
                   className="h-full w-full object-cover object-top"
                   src={images.specialist}
                 />
               </div>
-              <div className="absolute bottom-8 right-[-0.5rem] rounded-l-2xl bg-rose px-6 py-5 text-white shadow-card md:right-[-2rem]">
+              <div className="absolute bottom-8 -right-2 rounded-l-2xl bg-rose px-6 py-5 text-white shadow-card md:-right-8">
                 <p className="font-display text-3xl font-medium">20+</p>
                 <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80">Anos de dedicação</p>
               </div>
@@ -621,14 +560,14 @@ function App() {
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
               {services.map((service) => (
                 <article className="service-card group" key={service.title}>
-                  <div className="relative aspect-[5/4] overflow-hidden">
+                  <div className="relative aspect-5/4 overflow-hidden">
                     <img alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" src={service.image} />
                     <span className="absolute left-5 top-5 grid size-11 place-items-center rounded-full bg-white/90 font-display text-lg text-bronze backdrop-blur">
                       {service.number}
                     </span>
                   </div>
                   <div className="flex flex-1 flex-col p-6 md:p-7">
-                    <span className="mb-4 w-fit rounded-full bg-cream px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-bronze">
+                    <span className="mb-4 w-fit rounded-full bg-cream px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-bronze">
                       {service.tag}
                     </span>
                     <h3 className="font-display text-2xl font-semibold">{service.title}</h3>
@@ -672,7 +611,7 @@ function App() {
                 { name: 'Unidade 02', image: images.salonTwo, detail: 'Camaçari — Bahia' },
               ].map((unit, index) => (
                 <article className="overflow-hidden rounded-2xl border border-bronze/15 bg-white shadow-soft" key={unit.name}>
-                  <div className="aspect-[16/8] overflow-hidden">
+                  <div className="aspect-16/8 overflow-hidden">
                     <img alt={`Ambiente elegante da ${unit.name}`} className="h-full w-full object-cover" src={unit.image} />
                   </div>
                   <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-end md:p-8">
@@ -718,7 +657,7 @@ function App() {
                 Mais do que transformar cabelos, cultivamos relações de confiança que atravessam gerações.
               </p>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-7 md:p-10">
+            <div className="testimonial-card rounded-3xl border border-white/10 bg-white/6 p-7 md:p-10">
               <Icon className="size-10 text-rose-light" name="quote" />
               <blockquote className="mt-5 font-display text-2xl leading-relaxed md:text-3xl">
                 “Encontrei um salão que realmente escuta o que eu quero e cuida do meu cabelo com carinho. O resultado ficou leve, brilhante e muito natural.”
@@ -735,7 +674,7 @@ function App() {
           </div>
         </section>
 
-        <section className="section-space bg-white">
+        <section className="section-space bg-white" id="transformacoes">
           <div className="shell">
             <SectionHeading
               centered
@@ -746,7 +685,7 @@ function App() {
                 </>
               }
             />
-            <div className="mt-12 grid auto-rows-[230px] grid-cols-2 gap-3 md:auto-rows-[300px] md:grid-cols-4 md:gap-5">
+            <div className="mt-12 grid auto-rows-57.5 grid-cols-2 gap-3 md:auto-rows-75 md:grid-cols-4 md:gap-5">
               {[
                 [images.hero, 'md:row-span-2'],
                 [images.blonde, ''],
@@ -792,8 +731,14 @@ function App() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-rose py-20 text-white md:py-24">
-          <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_20%_20%,white_0,transparent_35%),radial-gradient(circle_at_80%_80%,white_0,transparent_30%)]" />
+        <section className="relative overflow-hidden bg-rose py-20 text-white md:py-24" id="agendamento">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at 20% 20%, white 0, transparent 35%), radial-gradient(circle at 80% 80%, white 0, transparent 30%)',
+            }}
+          />
           <div className="shell relative text-center">
             <p className="eyebrow text-white/70">Seu momento começa aqui</p>
             <h2 className="section-title mx-auto mt-5 max-w-3xl font-display text-4xl font-medium leading-tight md:text-6xl">

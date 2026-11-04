@@ -271,6 +271,12 @@
   }
 }
 
+@keyframes video-intro-spin {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
 @media (min-width: 768px) {
   @layer components {
     .shell {

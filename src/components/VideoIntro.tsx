@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -16,7 +16,6 @@ export function VideoIntro({
   const videoRef = useRef<HTMLVideoElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
-  const [showSite, setShowSite] = useState(false)
   const transitionTriggered = useRef(false)
 
   useGSAP(() => {
@@ -47,15 +46,20 @@ export function VideoIntro({
       }
     }
 
-    const triggerTransition = () => {
+    const handleError = () => {
+      transitionTriggered.current = true
       setIsPlaying(false)
+      onComplete()
+    }
+
+    const triggerTransition = () => {
       // Fade out overlay
       gsap.to(overlay, {
         opacity: 0,
         duration: 1.2,
         ease: 'power2.inOut',
         onComplete: () => {
-          setShowSite(false)
+          setIsPlaying(false)
           onComplete()
         },
       })
@@ -71,6 +75,7 @@ export function VideoIntro({
     video.addEventListener('canplay', handleCanPlay)
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('ended', handleEnded)
+    video.addEventListener('error', handleError)
 
     // Attempt to play
     video.muted = true // required for autoplay
@@ -84,6 +89,7 @@ export function VideoIntro({
       video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('ended', handleEnded)
+      video.removeEventListener('error', handleError)
       gsap.killTweensOf(overlay)
       gsap.killTweensOf(video)
     }
@@ -121,23 +127,41 @@ export function VideoIntro({
           opacity: 1,
         }}
       />
-      {/* Optional: loading indicator */}
       <div
+        aria-label="Carregando"
+        role="status"
+        style={{
+          position: 'absolute',
+          bottom: '3.5rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '1.75rem',
+          height: '1.75rem',
+          border: '2px solid rgba(255,255,255,0.35)',
+          borderTopColor: '#ffffff',
+          borderRadius: '50%',
+          animation: 'video-intro-spin 0.8s linear infinite',
+          zIndex: 1,
+        }}
+      />
+      <p
         style={{
           position: 'absolute',
           bottom: '2rem',
           left: '50%',
+          margin: 0,
           transform: 'translateX(-50%)',
           color: 'rgba(255,255,255,0.7)',
           fontSize: '0.85rem',
           fontFamily: 'var(--font-sans)',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
           zIndex: 1,
         }}
       >
-        Carregando...
-      </div>
+        Seja bem-vindo ao Salão Estilo &amp; Graça
+      </p>
     </div>
   )
 }

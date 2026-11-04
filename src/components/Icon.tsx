@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type CSSProperties, type ReactNode } from 'react'
 
 export interface IconProps {
   name:
@@ -17,12 +17,14 @@ export interface IconProps {
     | 'star'
     | 'arrowDiagonal'
   className?: string
+  style?: CSSProperties
   'aria-hidden'?: boolean
 }
 
 export function Icon({
   name,
   className = 'size-5',
+  style,
   'aria-hidden': ariaHidden = true,
 }: IconProps) {
   const paths: Record<string, ReactNode> = {
@@ -96,6 +98,7 @@ export function Icon({
     <svg
       aria-hidden={ariaHidden}
       className={className}
+      style={style}
       fill="none"
       stroke="currentColor"
       strokeLinecap="round"
