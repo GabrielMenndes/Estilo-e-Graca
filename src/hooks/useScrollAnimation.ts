@@ -95,3 +95,86 @@ export function useStaggeredAnimation(selector: string, options: ScrollAnimation
 
   useScrollAnimation(selector, { y, duration, stagger, delay, ...rest })
 }
+
+/**
+ * Efeito scroll-linked (scrub) para textos principais do hero.
+ * O texto responde diretamente à posição do scroll com parallax suave.
+ */
+export function useHeroScrollLinkedAnimation() {
+  useGSAP(() => {
+    const heroTitle = document.querySelector('.hero-title')
+    const heroText = document.querySelector('.hero-text')
+    const heroBadge = document.querySelector('.hero-badge')
+    const heroButtons = document.querySelector('.hero-buttons')
+
+    if (!heroTitle || !heroText) return
+
+    const ctx = gsap.context(() => {
+      // Animação do título principal com parallax vertical suave
+      gsap.fromTo(heroTitle,
+        { y: 0 },
+        {
+          y: -80,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '#inicio',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.8,
+          }
+        }
+      )
+
+      // Texto descriptivo com parallax mais lento
+      gsap.fromTo(heroText,
+        { y: 0 },
+        {
+          y: -40,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '#inicio',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+          }
+        }
+      )
+
+      // Badge com parallax oposto (sobe mais devagar)
+      if (heroBadge) {
+        gsap.fromTo(heroBadge,
+          { y: 0 },
+          {
+            y: -20,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '#inicio',
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1.2,
+            }
+          }
+        )
+      }
+
+      // Botões com efeito sutil
+      if (heroButtons) {
+        gsap.fromTo(heroButtons,
+          { y: 0 },
+          {
+            y: -15,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '#inicio',
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1.3,
+            }
+          }
+        )
+      }
+    })
+
+    return () => ctx.revert()
+  }, [])
+}
