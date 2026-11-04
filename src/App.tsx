@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { useSectionTitleAnimation, useStaggeredAnimation, useHeroScrollLinkedAnimation } from './hooks/useScrollAnimation'
+import { useSectionTitleAnimation, useStaggeredAnimation, useHeroScrollLinkedAnimation, useTextSplitReveal } from './hooks/useScrollAnimation'
 import { ArrowRevealButton } from './components/ArrowRevealButton'
 import { VideoIntro } from './components/VideoIntro'
 
@@ -202,6 +202,8 @@ function App() {
   // Scroll animations for section titles and content
   useSectionTitleAnimation()
   useHeroScrollLinkedAnimation()
+  useTextSplitReveal('.hero-title')
+  useTextSplitReveal('.section-title')
   useStaggeredAnimation('.hero-badge', { y: 30, delay: 0.1 })
   useStaggeredAnimation('.hero-title', { y: 40, delay: 0.2 })
   useStaggeredAnimation('.hero-text', { y: 30, delay: 0.3 })
