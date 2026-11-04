@@ -265,11 +265,10 @@ export function ArrowRevealButton({
   return (
     <div
       style={{
-        display: 'inline-flex',
         position: 'relative',
         overflow: 'visible',
       }}
-      className={className}
+      className={className.includes('hidden') ? className : `inline-flex ${className}`}
     >
       <Tag
         ref={(element: HTMLButtonElement | HTMLAnchorElement | null) => {

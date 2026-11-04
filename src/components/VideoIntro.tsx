@@ -1,22 +1,35 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 interface VideoIntroProps {
   onComplete: () => void
   videoSrc?: string
+  mobileVideoSrc?: string
   transitionTimestamp?: number // timestamp in seconds when doors open
 }
 
 export function VideoIntro({
   onComplete,
   videoSrc = `${import.meta.env.BASE_URL}videodaentrada.mp4`,
+  mobileVideoSrc = `${import.meta.env.BASE_URL}assets/videodaentradamobile.mp4`,
   transitionTimestamp = 3.5, // default: 3.5 seconds (adjust based on your video)
 }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
   const transitionTriggered = useRef(false)
+  const [isMobile, setIsMobile] = useState<boolean | null>(null)
+  const activeTransitionTimestamp = isMobile ? Math.max(0, transitionTimestamp - 1) : transitionTimestamp
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600)
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useGSAP(() => {
     const video = videoRef.current
@@ -34,7 +47,7 @@ export function VideoIntro({
 
     const handleTimeUpdate = () => {
       // Trigger transition at the specified timestamp (when doors open)
-      if (!transitionTriggered.current && video.currentTime >= transitionTimestamp) {
+      if (!transitionTriggered.current && video.currentTime >= activeTransitionTimestamp) {
         transitionTriggered.current = true
         triggerTransition()
       }
@@ -93,7 +106,7 @@ export function VideoIntro({
       gsap.killTweensOf(overlay)
       gsap.killTweensOf(video)
     }
-  }, [onComplete, transitionTimestamp])
+  }, [activeTransitionTimestamp, isMobile, onComplete])
 
   if (!isPlaying) return null
 
@@ -112,22 +125,25 @@ export function VideoIntro({
       }}
       aria-hidden="true"
     >
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          opacity: 1,
-        }}
-      />
+      {isMobile !== null && (
+        <video
+          key={isMobile ? mobileVideoSrc : videoSrc}
+          ref={videoRef}
+          src={isMobile ? mobileVideoSrc : videoSrc}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 1,
+          }}
+        />
+      )}
       <div
         aria-label="Carregando"
         role="status"

@@ -142,26 +142,26 @@ function Logo({ light = false }: { light?: boolean }) {
   return (
     <a
       aria-label="Salão Estilo & Graça — início"
-      className="group flex items-center gap-3"
+      className="group flex min-w-0 items-center gap-2 md:gap-3"
       href="#inicio"
     >
-      <span className="logo-shine relative grid h-14 w-16 shrink-0 place-items-center overflow-hidden rounded-full md:h-16 md:w-18">
+      <span className="logo-shine relative grid h-12 w-14 shrink-0 place-items-center overflow-hidden rounded-full md:h-16 md:w-18">
         <img
           alt=""
           className="h-full w-full rounded-full object-contain shadow-[0_4px_4px_0_rgba(221,168,176,0.25),inset_0_4px_4px_0_rgb(221,168,176)]"
           src={`${import.meta.env.BASE_URL}assets/logo-estilo-graca-transparent.png`}
         />
       </span>
-      <span className="leading-none">
-        <strong className={`font-display block text-lg font-medium md:text-xl ${light ? 'text-white' : 'text-charcoal'}`}>
+      <span className="min-w-0 leading-none">
+        <strong className={`font-display block whitespace-nowrap text-[15px] font-medium md:text-xl ${light ? 'text-white' : 'text-charcoal'}`}>
           Salão Estilo <i className="font-normal text-rose">&</i> Graça
         </strong>
         <span
-          className={`mt-1.5 block text-[8px] font-bold uppercase tracking-[0.2em] md:text-[9px] ${
+          className={`mt-1.5 block whitespace-nowrap text-[7px] font-bold uppercase tracking-[0.12em] md:text-[9px] md:tracking-[0.2em] ${
             light ? 'text-white/55' : 'text-bronze'
           }`}
         >
-          Estética • Bem-estar • Cabelo
+          Especialista Alisamento & Mechas
         </span>
       </span>
     </a>
@@ -398,15 +398,6 @@ function App() {
                   {label}
                 </a>
               ))}
-              <ArrowRevealButton
-                label="Agendar horário"
-                href={whatsappUrl}
-                iconName="arrow"
-                variant="bronze"
-                size="md"
-                className="mt-5 w-full"
-                iconSide="right"
-              />
             </div>
           </nav>
         )}
