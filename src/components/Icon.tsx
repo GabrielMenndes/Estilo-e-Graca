@@ -27,6 +27,29 @@ export function Icon({
   style,
   'aria-hidden': ariaHidden = true,
 }: IconProps) {
+  if (name === 'whatsapp') {
+    return (
+      <span
+        aria-hidden={ariaHidden}
+        className={className}
+        style={{
+          display: 'inline-block',
+          flex: 'none',
+          backgroundColor: 'currentColor',
+          maskImage: `url("${import.meta.env.BASE_URL}assets/whatsapp.svg")`,
+          maskPosition: 'center',
+          maskRepeat: 'no-repeat',
+          maskSize: 'contain',
+          WebkitMaskImage: `url("${import.meta.env.BASE_URL}assets/whatsapp.svg")`,
+          WebkitMaskPosition: 'center',
+          WebkitMaskRepeat: 'no-repeat',
+          WebkitMaskSize: 'contain',
+          ...style,
+        }}
+      />
+    )
+  }
+
   const paths: Record<string, ReactNode> = {
     arrow: (
       <>
@@ -66,12 +89,6 @@ export function Icon({
       <>
         <path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z" />
         <path d="m18.5 14 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z" />
-      </>
-    ),
-    whatsapp: (
-      <>
-        <path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" />
-        <path d="M9 8.5c.3 2.7 1.8 4.2 4.5 4.8l1-1c.2-.2.5-.2.8-.1l2 .9" />
       </>
     ),
     x: (

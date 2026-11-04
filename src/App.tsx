@@ -45,6 +45,28 @@ function Icon({
     | 'x'
   className?: string
 }) {
+  if (name === 'whatsapp') {
+    return (
+      <span
+        aria-hidden="true"
+        className={className}
+        style={{
+          display: 'inline-block',
+          flex: 'none',
+          backgroundColor: 'currentColor',
+          maskImage: `url("${import.meta.env.BASE_URL}assets/whatsapp.svg")`,
+          maskPosition: 'center',
+          maskRepeat: 'no-repeat',
+          maskSize: 'contain',
+          WebkitMaskImage: `url("${import.meta.env.BASE_URL}assets/whatsapp.svg")`,
+          WebkitMaskPosition: 'center',
+          WebkitMaskRepeat: 'no-repeat',
+          WebkitMaskSize: 'contain',
+        }}
+      />
+    )
+  }
+
   const paths: Record<string, ReactNode> = {
     arrow: (
       <>
