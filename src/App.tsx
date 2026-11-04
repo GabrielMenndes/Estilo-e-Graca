@@ -1,7 +1,11 @@
-import { useState, type ReactNode } from 'react'
-import { useSectionTitleAnimation, useStaggeredAnimation, useHeroScrollLinkedAnimation, useTextSplitReveal } from './hooks/useScrollAnimation'
+import { useState, type ReactNode, useRef, useEffect } from 'react'
+import { useGSAP } from '@gsap/react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRevealButton } from './components/ArrowRevealButton'
 import { VideoIntro } from './components/VideoIntro'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const whatsappUrl =
   'https://wa.me/?text=Olá!%20Gostaria%20de%20agendar%20um%20horário%20no%20Salão%20Estilo%20%26%20Graça.'
@@ -199,23 +203,192 @@ function App() {
 
   const [showSite, setShowSite] = useState(false)
 
-  // Scroll animations for section titles and content
-  useSectionTitleAnimation()
-  useHeroScrollLinkedAnimation()
-  useTextSplitReveal('.hero-title')
-  useTextSplitReveal('.section-title')
-  useStaggeredAnimation('.hero-badge', { y: 30, delay: 0.1 })
-  useStaggeredAnimation('.hero-title', { y: 40, delay: 0.2 })
-  useStaggeredAnimation('.hero-text', { y: 30, delay: 0.3 })
-  useStaggeredAnimation('.hero-buttons > *', { y: 30, stagger: 0.1, delay: 0.4 })
-  useStaggeredAnimation('.hero-social', { y: 30, delay: 0.5 })
-  useStaggeredAnimation('.hero-image', { y: 50, delay: 0.3 })
-  useStaggeredAnimation('.hero-card', { y: 40, delay: 0.6 })
-  useStaggeredAnimation('.stat-item', { y: 30, stagger: 0.1, delay: 0.1 })
-  useStaggeredAnimation('.service-card', { y: 40, stagger: 0.15, delay: 0.2 })
-  useStaggeredAnimation('#unidades article', { y: 40, stagger: 0.15, delay: 0.2 })
-  useStaggeredAnimation('#depoimentos blockquote', { y: 30, delay: 0.2 })
-  useStaggeredAnimation('.auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a', { y: 40, stagger: 0.1, delay: 0.2 })
+  // ===== ANIMAÇÕES SCROLL-LINKED (GSAP ScrollTrigger) =====
+
+  // Hero: Parallax em camadas + Reveal inicial
+  useGSAP(() => {
+    const heroSection = document.querySelector('#inicio')
+    const heroTitle = document.querySelector('.hero-title')
+    const heroText = document.querySelector('.hero-text')
+    const heroBadge = document.querySelector('.hero-badge')
+    const heroButtons = document.querySelector('.hero-buttons')
+    const heroSocial = document.querySelector('.hero-social')
+    const heroImage = document.querySelector('.hero-image')
+    const heroCard = document.querySelector('.hero-card')
+    const statItems = document.querySelectorAll('.stat-item')
+
+    if (!heroSection || !heroTitle || !heroText) return
+
+    const ctx = gsap.context(() => {
+      // TIMELINE PRINCIPAL - Parallax contínuo (scrub)
+      const heroTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroSection,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.8,
+        }
+      })
+
+      if (heroBadge) {
+        heroTl.fromTo(heroBadge, { y: 0 }, { y: -100, ease: 'none' }, 0)
+      }
+      heroTl.fromTo(heroTitle, { y: 0 }, { y: -80, ease: 'none' }, 0)
+      heroTl.fromTo(heroText, { y: 0 }, { y: -40, ease: 'none' }, 0)
+      if (heroButtons) {
+        heroTl.fromTo(heroButtons, { y: 0 }, { y: -20, ease: 'none' }, 0)
+      }
+      if (heroSocial) {
+        heroTl.fromTo(heroSocial, { y: 0 }, { y: -10, ease: 'none' }, 0)
+      }
+      if (heroImage) {
+        heroTl.fromTo(heroImage, { y: 0 }, { y: 30, ease: 'none' }, 0)
+      }
+      if (heroCard) {
+        heroTl.fromTo(heroCard, { y: 0 }, { y: -50, ease: 'none' }, 0)
+      }
+
+      // TIMELINE DE REVEAL INICIAL (toggleActions)
+      const revealTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroSection,
+          start: 'top 80%',
+          end: 'top 30%',
+          toggleActions: 'play none none reverse',
+          once: true,
+        }
+      })
+
+      revealTl
+        .fromTo('.hero-badge', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, 0)
+        .fromTo('.hero-title', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' }, 0.1)
+        .fromTo('.hero-text', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 0.2)
+        .fromTo('.hero-buttons > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }, 0.3)
+        .fromTo('.hero-social', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.4)
+        .fromTo('.hero-image', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out' }, 0.2)
+        .fromTo('.hero-card', { y: 40, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: 'power2.out' }, 0.5)
+        .fromTo('.stat-item', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.08 }, 0.3)
+
+      // Stats parallax contínuo
+      statItems.forEach((stat, index) => {
+        gsap.fromTo(stat, { y: 0 }, {
+          y: -30 + (index * 5),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroSection,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1 + (index * 0.1),
+          }
+        })
+      })
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  // Seções: Timeline scrub por seção + Split text reveal
+  useGSAP(() => {
+    const ctx = gsap.context(() => {
+      // Split text reveal para títulos
+      const splitTitles = (selector: string) => {
+        document.querySelectorAll(selector).forEach((el) => {
+          const originalText = el.textContent || ''
+          if (!originalText.trim()) return
+          const words = originalText.split(' ').filter(w => w.length > 0)
+          if (words.length <= 1) return
+          el.innerHTML = words.map((word, i) =>
+            `<span class="split-word" style="display: inline-block; opacity: 0; transform: translateY(30px);" data-index="${i}">${word}</span>`
+          ).join(' ')
+          const wordElements = el.querySelectorAll('.split-word')
+          gsap.fromTo(wordElements, { y: 30, opacity: 0 }, {
+            y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.05,
+            scrollTrigger: {
+              trigger: el, start: 'top 80%', end: 'bottom 20%',
+              toggleActions: 'play none none reverse', once: true,
+            }
+          })
+        })
+      }
+
+      splitTitles('.hero-title')
+      splitTitles('.section-title')
+
+      // Timeline scrub para cada seção
+      document.querySelectorAll('section[id]').forEach((section) => {
+        const title = section.querySelector('.section-title')
+        const eyebrow = section.querySelector('.eyebrow')
+        const text = section.querySelector('.section-text')
+        const cards = section.querySelectorAll('.service-card, article, blockquote, .auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a, #unidades article, #depoimentos blockquote')
+        if (!title) return
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 75%',
+            end: 'bottom 25%',
+            scrub: 0.6,
+            toggleActions: 'play reverse play reverse',
+          }
+        })
+
+        if (eyebrow) {
+          tl.fromTo(eyebrow, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
+        }
+        tl.fromTo(title, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' }, 0.1)
+        if (text) {
+          tl.fromTo(text, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 0.2)
+        }
+        if (cards.length) {
+          tl.fromTo(cards, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }, 0.3)
+        }
+      })
+    })
+    return () => ctx.revert()
+  }, [])
+
+  // Staggered animations (entrada simples)
+  useGSAP(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.hero-badge', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', delay: 0.1,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-title', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out', delay: 0.2,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-text', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.3,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-buttons > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1, delay: 0.4,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-social', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.5,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-image', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out', delay: 0.3,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.hero-card', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.6,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.stat-item', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1, delay: 0.1,
+        scrollTrigger: { trigger: '#inicio', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.service-card', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.15, delay: 0.2,
+        scrollTrigger: { trigger: '#servicos', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('#unidades article', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.15, delay: 0.2,
+        scrollTrigger: { trigger: '#unidades', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('#depoimentos blockquote', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.2,
+        scrollTrigger: { trigger: '#depoimentos', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+      gsap.fromTo('.auto-rows-\\[230px\\] > a, .md\\:auto-rows-\\[300px\\] > a', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1, delay: 0.2,
+        scrollTrigger: { trigger: '#transformacoes', start: 'top 85%', toggleActions: 'play none none none', once: true }
+      })
+    })
+    return () => ctx.revert()
+  }, [])
 
   return (
     <>
